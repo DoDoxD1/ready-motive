@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/aunuj/AndroidStudioProjects/ReadyMotive/app/src/main/res/drawable/google_button_bg.xml" value="0.2265" />
         <entry key="..\:/Users/aunuj/AndroidStudioProjects/ReadyMotive/app/src/main/res/layout/activity_getting_started.xml" value="0.22826086956521738" />
         <entry key="..\:/Users/aunuj/AndroidStudioProjects/ReadyMotive/app/src/main/res/layout/activity_main.xml" value="0.22826086956521738" />
+        <entry key="..\:/Users/aunuj/AndroidStudioProjects/ReadyMotive/app/src/main/res/layout/activity_sign_in.xml" value="0.25677083333333334" />
       </map>
     </option>
   </component>
