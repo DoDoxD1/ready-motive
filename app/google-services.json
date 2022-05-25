@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "642133632100",
+    "project_id": "readymotive-b2fe2",
+    "storage_bucket": "readymotive-b2fe2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642133632100:android:1828c7c1cfd21029c8eb71",
+        "android_client_info": {
+          "package_name": "com.example.readymotive"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "642133632100-joiqg2tbaglqtmk22irjoph7sjaq9tiq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBACw6EvfNtbq-sQTMlDFyniyBNEgNSc6s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "642133632100-joiqg2tbaglqtmk22irjoph7sjaq9tiq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
