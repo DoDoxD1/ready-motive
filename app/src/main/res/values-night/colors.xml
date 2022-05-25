@@ -7,8 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    // light mode colour
-    <color name="text_head">#000000</color>
-    <color name="button_bg">#000000</color>
-    <color name="status_bar">#ffffff</color>
+    // night mode colours
+    <color name="text_head">#ffffff</color>
+    <color name="button_bg">#ffffff</color>
+    <color name="status_bar">#000000</color>
 </resources>
