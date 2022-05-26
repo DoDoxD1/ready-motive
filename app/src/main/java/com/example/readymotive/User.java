@@ -1,7 +1,20 @@
 package com.example.readymotive;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class User {
     private String lname, fname, email, password, mobileNumber;
+
+    static FirebaseAuth mAuth;
+    static FirebaseUser mUser;
+    static User user;
+    static FirebaseFirestore db;
+    static DocumentReference userRef;
 
     public User() {
     }
@@ -18,6 +31,25 @@ public class User {
         this.email = email;
         this.password = password;
         this.mobileNumber = mobileNumber;
+    }
+
+    public static void getCurrentUserFromDB() {
+        mAuth = FirebaseAuth.getInstance();
+        mUser = mAuth.getCurrentUser();
+        db = FirebaseFirestore.getInstance();
+        if(mUser!=null)
+            userRef = db.collection("Users").document(mUser.getUid());
+        if(userRef!=null)
+            userRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    user = documentSnapshot.toObject(User.class);
+                }
+            });
+    }
+
+    public static User getUser() {
+        return user;
     }
 
     public String getLname() {
