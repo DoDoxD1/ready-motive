@@ -1,6 +1,7 @@
 package com.example.readymotive;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -15,13 +16,20 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -38,6 +46,9 @@ public class SignupActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private CollectionReference userRef;
+    private GoogleSignInClient googleSignInClient;
+
+    public static final int RC_SIGN_IN = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +73,13 @@ public class SignupActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         userRef = db.collection("Users");
+
+        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+
+        googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
 
         singInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,9 +124,73 @@ public class SignupActivity extends AppCompatActivity {
         googleSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(SignupActivity.this, "Sign up with google pressed!", Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.VISIBLE);
+                googleSignIn();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> accountTask = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount googleSignInAccount = accountTask.getResult(ApiException.class);
+                firebaseAuthWithGoogleAccount(googleSignInAccount);
+            } catch (Exception e) {
+                Log.i("aunu", "onActivityResult: "+e);
+            }
+        }
+
+    }
+
+    private void firebaseAuthWithGoogleAccount(GoogleSignInAccount googleSignInAccount) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(googleSignInAccount.getIdToken(), null);
+        mAuth.signInWithCredential(credential)
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if(authResult.getAdditionalUserInfo().isNewUser())
+                            storeUserToDB(googleSignInAccount);
+                        updateUI(mAuth.getCurrentUser());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+    }
+
+    private void storeUserToDB(GoogleSignInAccount googleSignInAccount) {
+        String fname, lname, email;
+        fname = googleSignInAccount.getGivenName();
+        lname = googleSignInAccount.getFamilyName();
+        email = googleSignInAccount.getEmail();
+        User user = new User(lname,fname,email);
+        userRef.document(mAuth.getCurrentUser().getUid()).set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                progressBar.setVisibility(View.GONE);
+                updateUI(mAuth.getCurrentUser());
+                finishAffinity();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progressBar.setVisibility(View.GONE);
+                Log.w("aunu", "createUserWithEmail:failure"+ e);
+            }
+        });
+    }
+
+    private void googleSignIn() {
+        Intent intent = googleSignInClient.getSignInIntent();
+        startActivityForResult(intent, RC_SIGN_IN);
     }
 
     private void signUp(String email, String pass, String fname, String lname, String mobile) {
@@ -137,7 +219,7 @@ public class SignupActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Void aVoid) {
                 progressBar.setVisibility(View.GONE);
-                updateUI(user);
+                updateUI(mAuth.getCurrentUser());
                 finishAffinity();
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -149,9 +231,11 @@ public class SignupActivity extends AppCompatActivity {
         });
     }
 
-    private void updateUI(User user) {
-        Intent intent = new Intent(SignupActivity.this,MainActivity.class);
-        startActivity(intent);
-        finishAffinity();
+    private void updateUI(FirebaseUser user) {
+        if(user!=null){
+            Intent intent = new Intent(SignupActivity.this,MainActivity.class);
+            startActivity(intent);
+            finishAffinity();
+        }
     }
 }
